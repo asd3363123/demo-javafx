@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="655.0" prefWidth="599.0" style="-fx-background-color: gray;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.MainController">
+   <children>
+      <TabPane layoutX="102.0" layoutY="238.0" prefHeight="655.0" prefWidth="599.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <tabs>
+          <Tab text="字符串工具">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Button fx:id="button_replace" layoutX="344.0" layoutY="558.0" mnemonicParsing="false" onAction="#getReplace" text="正则替换" />
+                        <TextArea fx:id="text_result" editable="false" layoutX="23.0" layoutY="355.0" prefHeight="178.0" prefWidth="553.0" promptText="(匹配结果)" />
+                        <TextField fx:id="text_replace" layoutX="23.0" layoutY="91.0" prefHeight="40.0" prefWidth="553.0" promptText="(请输入替换字符)" />
+                        <TextField fx:id="text_regex" layoutX="23.0" layoutY="22.0" prefHeight="40.0" prefWidth="553.0" promptText="(请输入正则表达式)" />
+                        <TextArea fx:id="text_src" layoutX="23.0" layoutY="154.0" prefHeight="178.0" prefWidth="553.0" promptText="(待匹配的文本)" />
+                        <Button fx:id="button_run" layoutX="205.0" layoutY="558.0" mnemonicParsing="false" onAction="#getMarcher" text="正则匹配" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="URL工具">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="text_url" layoutX="36.0" layoutY="37.0" prefHeight="50.0" prefWidth="500.0" promptText="（请输入URL）" />
+                        <TextArea fx:id="text_respond" editable="false" layoutX="36.0" layoutY="165.0" prefHeight="300.0" prefWidth="500.0" promptText="（返回的数据）" />
+                        <Button fx:id="button_connect" layoutX="236.0" layoutY="534.0" mnemonicParsing="false" onAction="#openURL" prefHeight="50.0" prefWidth="100.0" text="获取数据" />
+                        <TextField fx:id="text_charset" layoutX="36.0" layoutY="99.0" prefHeight="50.0" prefWidth="500.0" promptText="（字符集，可为空）" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>
