@@ -33,7 +33,8 @@
                         <TextField fx:id="text_url" layoutX="36.0" layoutY="37.0" prefHeight="50.0" prefWidth="500.0" promptText="（请输入URL）" />
                         <TextArea fx:id="text_respond" editable="false" layoutX="36.0" layoutY="165.0" prefHeight="300.0" prefWidth="500.0" promptText="（返回的数据）" />
                         <Button fx:id="button_connect" layoutX="236.0" layoutY="534.0" mnemonicParsing="false" onAction="#openURL" prefHeight="50.0" prefWidth="100.0" text="获取数据" />
-                        <TextField fx:id="text_charset" layoutX="36.0" layoutY="99.0" prefHeight="50.0" prefWidth="500.0" promptText="（字符集，可为空）" />
+                        <TextField fx:id="text_charset" layoutX="36.0" layoutY="99.0" prefHeight="50.0" prefWidth="300.0" promptText="（字符集，可为空）" />
+                        <CheckBox fx:id="check_gzip" layoutX="394.0" layoutY="114.0" mnemonicParsing="false" text="使用gzip解压" />
                      </children></AnchorPane>
             </content>
           </Tab>

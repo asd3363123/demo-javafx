@@ -37,6 +37,8 @@ public class MainController {
     private Button button_connect;
     @FXML
     private TextField text_charset;
+    @FXML
+    private CheckBox check_gzip;
 
     public MainController() {
     }
@@ -77,10 +79,9 @@ public class MainController {
             try {
                 URL url = new URL(src);
                 URLConnection connection = url.openConnection();
+
                 //HTTP特殊处理
                 HttpURLConnection httpURLConnection = null;
-                //返回流
-                InputStream is;
                 if (connection instanceof HttpURLConnection) {
                     httpURLConnection = (HttpURLConnection) connection;
                     httpURLConnection.setRequestMethod("GET");
@@ -92,10 +93,8 @@ public class MainController {
                     httpURLConnection.addRequestProperty("Connection", "keep-alive");
                     httpURLConnection.addRequestProperty("Upgrade-Insecure-Requests", "1");
                     httpURLConnection.addRequestProperty("Cookie", "_uuid=00C616CA-4E42-C879-8CA4-08A4FCAD9C2540245infoc; buvid3=FAB8EA3F-AF0C-48CF-A628-63098690201B5457infoc; rpdid=pspoixwxxdospiksmxww; CURRENT_FNVAL=16; _uuid=2E935632-9C1C-4E27-8A1F-FA52CBD64F9B93052infoc; LIVE_BUVID=AUTO1415426957952781; UM_distinctid=1672fd66d4f40-0a7e1ea1005e81-6313363-144000-1672fd66d50562; sid=9bhiyq9v; fts=1543317658; Hm_lvt_8a6e55dbd2870f0f5bc9194cddf32a02=1544965879; DedeUserID=354241872; DedeUserID__ckMd5=eb6b63bcc1830f97; SESSDATA=4cbd35f1%2C1557232096%2Cbf7b0a41; bili_jct=2705564ca691b593ff1e442ffde3f187; CURRENT_QUALITY=80; bp_t_offset_354241872=202411500742088189; _dfcaptcha=7b8170c330f8a6fc99e92e19f8535ec5; stardustvideo=-1");
-                    is = new GZIPInputStream(httpURLConnection.getInputStream());
-                } else {
-                    is = connection.getInputStream();
                 }
+
                 //指定字符集
                 String charset = text_charset.getText();
                 try {
@@ -105,8 +104,16 @@ public class MainController {
                 }
                 System.out.println("chaset = " + charset);
 
+                //返回流
+                InputStream is = connection.getInputStream();
+                //是否使用gzip解压
+                if (check_gzip.isSelected()) {
+                    is = new GZIPInputStream(is);
+                }
+
                 reader = new BufferedReader(new InputStreamReader(is, charset));
 
+                //若是HTTP请求，则输入响应信息
                 if (httpURLConnection != null) {
                     System.out.println("http code : " + httpURLConnection.getResponseCode());
                     System.out.println("http message : " + httpURLConnection.getResponseMessage());
@@ -216,5 +223,13 @@ public class MainController {
 
     public void setText_charset(TextField text_charset) {
         this.text_charset = text_charset;
+    }
+
+    public CheckBox getCheck_gzip() {
+        return check_gzip;
+    }
+
+    public void setCheck_gzip(CheckBox check_gzip) {
+        this.check_gzip = check_gzip;
     }
 }
