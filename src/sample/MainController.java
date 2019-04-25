@@ -3,15 +3,14 @@ package sample;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -39,6 +38,31 @@ public class MainController {
     private TextField text_charset;
     @FXML
     private CheckBox check_gzip;
+    @FXML
+    private TextArea text_http_request_header;
+    @FXML
+    private CheckBox check_output_file;
+    @FXML
+    private TextField text_file_path;
+
+    /**
+     * 默认文件路径
+     */
+    private static final String DEFAULT_FILE_PATH = "default.file";
+
+    /**
+     * http请求默认请求头
+     */
+    private static final Map<String, String> DEFAULT_HTTP_HEADER = new HashMap<String, String>() {{
+        put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
+        put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        put("Accept-Encoding", "gzip");
+        put("Accept-Language", "zh-CN,zh;q=0.9");
+        put("Cache-Control", "max-age=0");
+        put("Connection", "keep-alive");
+        put("Upgrade-Insecure-Requests", "1");
+        put("Cookie", "_uuid=00C616CA-4E42-C879-8CA4-08A4FCAD9C2540245infoc; buvid3=FAB8EA3F-AF0C-48CF-A628-63098690201B5457infoc; rpdid=pspoixwxxdospiksmxww; CURRENT_FNVAL=16; _uuid=2E935632-9C1C-4E27-8A1F-FA52CBD64F9B93052infoc; LIVE_BUVID=AUTO1415426957952781; UM_distinctid=1672fd66d4f40-0a7e1ea1005e81-6313363-144000-1672fd66d50562; sid=9bhiyq9v; fts=1543317658; Hm_lvt_8a6e55dbd2870f0f5bc9194cddf32a02=1544965879; DedeUserID=354241872; DedeUserID__ckMd5=eb6b63bcc1830f97; SESSDATA=4cbd35f1%2C1557232096%2Cbf7b0a41; bili_jct=2705564ca691b593ff1e442ffde3f187; CURRENT_QUALITY=80; bp_t_offset_354241872=202411500742088189; _dfcaptcha=7b8170c330f8a6fc99e92e19f8535ec5; stardustvideo=-1");
+    }};
 
     public MainController() {
     }
@@ -70,11 +94,26 @@ public class MainController {
         text_result.setText(result);
     }
 
+    /**
+     * 是否输出到文件
+     */
+    @FXML
+    public void clickForCheckBoxFile() {
+        boolean flag = check_output_file.isSelected();
+        text_file_path.setDisable(!flag);
+        text_file_path.setEditable(flag);
+        text_file_path.setText(flag ? DEFAULT_FILE_PATH : null);
+
+    }
+
+    /**
+     * 获取数据
+     */
     @FXML
     public void openURL() {
         String src = text_url.getText();
-        StringBuilder respond = new StringBuilder();
         BufferedReader reader = null;
+        FileOutputStream fos = null;
         if (src != null && !src.isEmpty()) {
             try {
                 URL url = new URL(src);
@@ -85,14 +124,22 @@ public class MainController {
                 if (connection instanceof HttpURLConnection) {
                     httpURLConnection = (HttpURLConnection) connection;
                     httpURLConnection.setRequestMethod("GET");
-                    httpURLConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
-                    httpURLConnection.addRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
-                    httpURLConnection.addRequestProperty("Accept-Encoding", "gzip");
-                    httpURLConnection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.9");
-                    httpURLConnection.addRequestProperty("Cache-Control", "max-age=0");
-                    httpURLConnection.addRequestProperty("Connection", "keep-alive");
-                    httpURLConnection.addRequestProperty("Upgrade-Insecure-Requests", "1");
-                    httpURLConnection.addRequestProperty("Cookie", "_uuid=00C616CA-4E42-C879-8CA4-08A4FCAD9C2540245infoc; buvid3=FAB8EA3F-AF0C-48CF-A628-63098690201B5457infoc; rpdid=pspoixwxxdospiksmxww; CURRENT_FNVAL=16; _uuid=2E935632-9C1C-4E27-8A1F-FA52CBD64F9B93052infoc; LIVE_BUVID=AUTO1415426957952781; UM_distinctid=1672fd66d4f40-0a7e1ea1005e81-6313363-144000-1672fd66d50562; sid=9bhiyq9v; fts=1543317658; Hm_lvt_8a6e55dbd2870f0f5bc9194cddf32a02=1544965879; DedeUserID=354241872; DedeUserID__ckMd5=eb6b63bcc1830f97; SESSDATA=4cbd35f1%2C1557232096%2Cbf7b0a41; bili_jct=2705564ca691b593ff1e442ffde3f187; CURRENT_QUALITY=80; bp_t_offset_354241872=202411500742088189; _dfcaptcha=7b8170c330f8a6fc99e92e19f8535ec5; stardustvideo=-1");
+                    //默认请求头
+                    Map<String, String> header = new HashMap<>(DEFAULT_HTTP_HEADER);
+                    //指定的请求头，若key相同则覆盖默认值
+                    String headerInput = text_http_request_header.getText();
+                    if (headerInput != null && !(headerInput = headerInput.trim()).isEmpty()) {
+                        String[] headerLines = headerInput.split("\n");
+                        for (String line : headerLines) {
+                            int mark = line.indexOf(':');
+                            if (mark > 0) {
+                                String key = line.substring(0, mark).trim();
+                                String value = line.substring(mark + 1).trim();
+                                header.put(key, value);
+                            }
+                        }
+                    }
+                    header.forEach(httpURLConnection::addRequestProperty);
                 }
 
                 //指定字符集
@@ -110,10 +157,7 @@ public class MainController {
                 if (check_gzip.isSelected()) {
                     is = new GZIPInputStream(is);
                 }
-
-                reader = new BufferedReader(new InputStreamReader(is, charset));
-
-                //若是HTTP请求，则输入响应信息
+                //若是HTTP请求，则输出响应信息
                 if (httpURLConnection != null) {
                     System.out.println("http code : " + httpURLConnection.getResponseCode());
                     System.out.println("http message : " + httpURLConnection.getResponseMessage());
@@ -124,10 +168,28 @@ public class MainController {
                     });
                 }
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    respond.append(line);
-                    respond.append("\n");
+                if (check_output_file.isSelected()) {
+                    //直接写入文件
+                    String filePath = text_file_path.getText();
+                    if (filePath == null || (filePath = filePath.trim()).isEmpty()) {
+                        filePath = DEFAULT_FILE_PATH;
+                    }
+                    fos = new FileOutputStream(filePath);
+                    byte[] temp = new byte[1024];
+                    int len;
+                    while ((len = is.read(temp)) > 0) {
+                        fos.write(temp, 0, len);
+                    }
+                } else {
+                    //返回到文本框
+                    reader = new BufferedReader(new InputStreamReader(is, charset));
+                    StringBuilder respond = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        respond.append(line);
+                        respond.append("\n");
+                    }
+                    text_respond.setText(respond.toString());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -136,13 +198,15 @@ public class MainController {
                     if (reader != null) {
                         reader.close();
                     }
+                    if (fos != null) {
+                        fos.close();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
             }
         }
-        text_respond.setText(respond.toString());
     }
 
     public TextField getText_regex() {
@@ -231,5 +295,29 @@ public class MainController {
 
     public void setCheck_gzip(CheckBox check_gzip) {
         this.check_gzip = check_gzip;
+    }
+
+    public TextArea getText_http_request_header() {
+        return text_http_request_header;
+    }
+
+    public void setText_http_request_header(TextArea text_http_request_header) {
+        this.text_http_request_header = text_http_request_header;
+    }
+
+    public CheckBox getCheck_output_file() {
+        return check_output_file;
+    }
+
+    public void setCheck_output_file(CheckBox check_output_file) {
+        this.check_output_file = check_output_file;
+    }
+
+    public TextField getText_file_path() {
+        return text_file_path;
+    }
+
+    public void setText_file_path(TextField text_file_path) {
+        this.text_file_path = text_file_path;
     }
 }

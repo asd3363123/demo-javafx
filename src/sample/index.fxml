@@ -30,11 +30,14 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TextField fx:id="text_url" layoutX="36.0" layoutY="37.0" prefHeight="50.0" prefWidth="500.0" promptText="（请输入URL）" />
-                        <TextArea fx:id="text_respond" editable="false" layoutX="36.0" layoutY="165.0" prefHeight="300.0" prefWidth="500.0" promptText="（返回的数据）" />
-                        <Button fx:id="button_connect" layoutX="236.0" layoutY="534.0" mnemonicParsing="false" onAction="#openURL" prefHeight="50.0" prefWidth="100.0" text="获取数据" />
-                        <TextField fx:id="text_charset" layoutX="36.0" layoutY="99.0" prefHeight="50.0" prefWidth="300.0" promptText="（字符集，可为空）" />
-                        <CheckBox fx:id="check_gzip" layoutX="394.0" layoutY="114.0" mnemonicParsing="false" text="使用gzip解压" />
+                        <TextField fx:id="text_url" layoutX="36.0" layoutY="14.0" prefHeight="40.0" prefWidth="500.0" promptText="（请输入URL）" />
+                        <TextArea fx:id="text_respond" editable="false" layoutX="36.0" layoutY="245.0" prefHeight="240.0" prefWidth="500.0" promptText="（返回的数据）" />
+                        <Button fx:id="button_connect" layoutX="236.0" layoutY="552.0" mnemonicParsing="false" onAction="#openURL" prefHeight="50.0" prefWidth="100.0" text="获取数据" />
+                        <TextField fx:id="text_charset" layoutX="36.0" layoutY="195.0" prefHeight="40.0" prefWidth="300.0" promptText="（字符集，可为空）" />
+                        <CheckBox fx:id="check_gzip" layoutX="384.0" layoutY="205.0" mnemonicParsing="false" text="使用gzip解压" />
+                        <TextArea fx:id="text_http_request_header" layoutX="36.0" layoutY="64.0" prefHeight="120.0" prefWidth="500.0" promptText="（请求头，可为空；key和value逗号分隔，换行去掉分号）" />
+                        <CheckBox fx:id="check_output_file" layoutX="36.0" layoutY="514.0" mnemonicParsing="false" onMouseClicked="#clickForCheckBoxFile" text="直接写入文件" />
+                        <TextField fx:id="text_file_path" disable="true" editable="false" layoutX="165.0" layoutY="504.0" prefHeight="40.0" prefWidth="371.0" promptText="（文件路径）" />
                      </children></AnchorPane>
             </content>
           </Tab>
