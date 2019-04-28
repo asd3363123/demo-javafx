@@ -2,6 +2,9 @@ package sample;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -9,8 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -44,6 +46,12 @@ public class MainController {
     private CheckBox check_output_file;
     @FXML
     private TextField text_file_path;
+    @FXML
+    private TextField text_github_url;
+//    @FXML
+//    private TextField text_github_file_dir;
+    @FXML
+    private Button button_github_get_code;
 
     /**
      * 默认文件路径
@@ -103,7 +111,6 @@ public class MainController {
         text_file_path.setDisable(!flag);
         text_file_path.setEditable(flag);
         text_file_path.setText(flag ? DEFAULT_FILE_PATH : null);
-
     }
 
     /**
@@ -207,6 +214,160 @@ public class MainController {
 
             }
         }
+    }
+
+    /**
+     * 爬取github代码
+     * 因为有些不需要的代码实在不想clone啊。。
+     */
+    @FXML
+    public void getGithubCodes() {
+        getGithubCode(null, null);
+    }
+
+    private void getGithubCode(Set<String> tasks, Set<String> completes) {
+        String url = text_github_url.getText();
+        if (url.contains("github.com")) {
+            return;
+        }
+        if (tasks == null) {
+            tasks = new HashSet<String>() {{
+                add(url);
+            }};
+        }
+        if (tasks.isEmpty()) {
+            System.out.println("不能没有任务！");
+            return;
+        }
+        if (completes == null) {
+            completes = new HashSet<>();
+        }
+
+        final Set<String> finalCompletes = completes;
+        final Set<String> newTasks = new HashSet<>();
+        final Set<String> finalCompletes1 = completes;
+        tasks.forEach(task -> {
+            if (task != null) {
+                synchronized (task) {
+                    if (!finalCompletes.contains(task)) {
+                        finalCompletes.add(task);
+                        InputStream is = null;
+                        FileWriter fw = null;
+                        try {
+                            URL target = new URL(task);
+                            System.out.println(task);
+                            HttpURLConnection connection = (HttpURLConnection) target.openConnection();
+                            connection.setRequestMethod("GET");
+                            DEFAULT_HTTP_HEADER.forEach(connection::addRequestProperty);
+                            Document document = Jsoup.parse(new GZIPInputStream(is = connection.getInputStream()), "utf-8", target.toURI().toString());
+                            Elements elements = document.getElementsByClass("blob-code-inner");
+
+                            //html提取
+                            final StringBuilder sb = new StringBuilder();
+                            elements.forEach(element -> {
+//                        System.out.println(element.toString());
+
+                                String line = element.toString();
+                                int start = 0, end = 0, len = line.length() - 1;
+                                StringBuilder lineCodeSB = new StringBuilder();
+                                while ((start = line.indexOf('>')) > 0 && start < len) {
+                                    line = line.substring(Math.min(start + 1, len));
+                                    len = line.length() - 1;
+                                    end = line.indexOf('<');
+                                    if (end > 0 && end < len) {
+                                        lineCodeSB.append(line, 0, end);
+                                    }
+                                }
+                                String lineCode = lineCodeSB.toString();
+                                sb.append(lineCode);
+                                sb.append("\n");
+
+                                String newUrl = getCImportURL(lineCode, task);
+                                if (!newUrl.isEmpty() && !finalCompletes1.contains(newUrl)) {
+                                    newTasks.add(newUrl);
+                                }
+                            });
+
+                            //写入文件
+                            String fileDir = "f:\\test\\github";
+                            String filePath = fileDir + target.getPath();
+                            System.out.println(filePath + " : file path");
+                            File file = new File(filePath);
+                            file.getParentFile().mkdirs();
+                            fw = new FileWriter(file);
+                            fw.write(sb.toString());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (is != null) {
+                                try {
+                                    is.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (fw != null) {
+                                try {
+                                    fw.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!newTasks.isEmpty()) {
+            getGithubCode(newTasks, finalCompletes);
+        }
+
+    }
+
+    private static String getJavaImportURL(String lineCode, String url) {
+        if (lineCode.contains("import") && !lineCode.contains("java.")
+                && !lineCode.contains("sun.") && !lineCode.contains("javax.")
+                && !lineCode.contains(".*")) {
+            lineCode = lineCode.trim();
+            String imp = lineCode.substring(lineCode.indexOf(' ') + 1, lineCode.indexOf(';'));
+            String uri = url.replaceAll("https://github.com/", "");
+            String[] src = uri.split("/");
+            String[] rep = imp.split("\\.");
+            int len1 = src.length, len2 = rep.length;
+            for (int i = 0; i < len2; i++) {
+                src[len1 - i - 1] = rep[len2 - i - 1];
+            }
+            StringBuilder newURL = new StringBuilder("https://github.com");
+            for (String s : src) {
+                newURL.append('/');
+                newURL.append(s);
+            }
+            return newURL.toString();
+        }
+        return "";
+    }
+
+    private static String getCImportURL(String lineCode, String url) {
+        if (lineCode.contains("#include ") && !lineCode.contains("<") && !lineCode.contains(">")
+                && !lineCode.contains("&lt;") && !lineCode.contains("&gt;")) {
+            lineCode = lineCode.trim();
+            String imp = lineCode.substring(lineCode.indexOf('"') + 1, lineCode.lastIndexOf('"'));
+            String uri = url.replaceAll("https://github.com/", "");
+            String[] src = uri.split("/");
+            String[] rep = imp.split("/");
+            int len1 = src.length, len2 = rep.length;
+            for (int i = 0; i < len2; i++) {
+                src[len1 - i - 1] = rep[len2 - i - 1];
+            }
+            StringBuilder newURL = new StringBuilder("https://github.com");
+            for (String s : src) {
+                newURL.append('/');
+                newURL.append(s);
+            }
+            return newURL.toString();
+        }
+        return "";
     }
 
     public TextField getText_regex() {
@@ -319,5 +480,21 @@ public class MainController {
 
     public void setText_file_path(TextField text_file_path) {
         this.text_file_path = text_file_path;
+    }
+
+    public TextField getText_github_url() {
+        return text_github_url;
+    }
+
+    public void setText_github_url(TextField text_github_url) {
+        this.text_github_url = text_github_url;
+    }
+
+    public Button getButton_github_get_code() {
+        return button_github_get_code;
+    }
+
+    public void setButton_github_get_code(Button button_github_get_code) {
+        this.button_github_get_code = button_github_get_code;
     }
 }

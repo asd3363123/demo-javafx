@@ -41,6 +41,16 @@
                      </children></AnchorPane>
             </content>
           </Tab>
+            <Tab text="Github工具">
+               <content>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="text_github_url" layoutX="14.0" layoutY="212.0" prefHeight="49.0" prefWidth="577.0" promptText="(url)" />
+                        <Button fx:id="button_github_get_code" layoutX="237.0" layoutY="377.0" mnemonicParsing="false" onAction="#getGithubCodes" text="Button" />
+                        <!--<TextField fx:id="text_github_file_dir" layoutX="81.0" layoutY="52.0" />-->
+                     </children>
+                  </AnchorPane>
+               </content></Tab>
         </tabs>
       </TabPane>
    </children>
