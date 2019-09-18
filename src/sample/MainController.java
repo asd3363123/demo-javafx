@@ -48,7 +48,7 @@ public class MainController {
     private TextField text_file_path;
     @FXML
     private TextField text_github_url;
-//    @FXML
+    //    @FXML
 //    private TextField text_github_file_dir;
     @FXML
     private Button button_github_get_code;
@@ -370,6 +370,34 @@ public class MainController {
         return "";
     }
 
+    /**
+     * ===================================== PDF Util Start ===========================================
+     */
+    //PDF文件路径
+    @FXML
+    public TextField text_pdf_file_path;
+    //开始生成书签
+    @FXML
+    public Button button_pdf_work;
+    //目录开始的张数
+    @FXML
+    public TextField text_pdf_directory_start;
+    //正文开始的张数
+    @FXML
+    public TextField text_pdf_body_start;
+
+    @FXML
+    public void pdfWorkStart() {
+        String pdfFilePath = text_pdf_file_path.getText();
+        String directoryStart = text_pdf_directory_start.getText();
+        String bodyStart = text_pdf_body_start.getText();
+        if (pdfFilePath == null || directoryStart == null || bodyStart == null) {
+            return;
+        }
+
+
+    }
+
     public TextField getText_regex() {
         return text_regex;
     }
@@ -496,5 +524,37 @@ public class MainController {
 
     public void setButton_github_get_code(Button button_github_get_code) {
         this.button_github_get_code = button_github_get_code;
+    }
+
+    public TextField getText_pdf_file_path() {
+        return text_pdf_file_path;
+    }
+
+    public void setText_pdf_file_path(TextField text_pdf_file_path) {
+        this.text_pdf_file_path = text_pdf_file_path;
+    }
+
+    public Button getButton_pdf_work() {
+        return button_pdf_work;
+    }
+
+    public void setButton_pdf_work(Button button_pdf_work) {
+        this.button_pdf_work = button_pdf_work;
+    }
+
+    public TextField getText_pdf_directory_start() {
+        return text_pdf_directory_start;
+    }
+
+    public void setText_pdf_directory_start(TextField text_pdf_directory_start) {
+        this.text_pdf_directory_start = text_pdf_directory_start;
+    }
+
+    public TextField getText_pdf_body_start() {
+        return text_pdf_body_start;
+    }
+
+    public void setText_pdf_body_start(TextField text_pdf_body_start) {
+        this.text_pdf_body_start = text_pdf_body_start;
     }
 }

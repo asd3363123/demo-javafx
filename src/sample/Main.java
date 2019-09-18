@@ -6,6 +6,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * 这个项目要 JDK8 才能运行，javafx已经过时啦！！
+ */
 public class Main extends Application {
 
     @Override
