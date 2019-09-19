@@ -1,5 +1,8 @@
 package sample;
 
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.jsoup.Jsoup;
@@ -386,8 +389,13 @@ public class MainController {
     @FXML
     public TextField text_pdf_body_start;
 
+    /**
+     * 详细代码请参阅 ITextDemo
+     *
+     * @see ITextDemo
+     */
     @FXML
-    public void pdfWorkStart() {
+    public void makePdfBookmark() {
         String pdfFilePath = text_pdf_file_path.getText();
         String directoryStart = text_pdf_directory_start.getText();
         String bodyStart = text_pdf_body_start.getText();
@@ -395,7 +403,70 @@ public class MainController {
             return;
         }
 
+        PdfReader src = null;
+        PdfStamper dest = null;
+        try {
+            src = new PdfReader(pdfFilePath);
+            dest = new PdfStamper(src, new FileOutputStream(pdfFilePath + ".new"));
+            List<HashMap<String, Object>> bookmarks = makeBookmark(
+                    src.getNumberOfPages(),
+                    Integer.parseInt(directoryStart),
+                    Integer.parseInt(bodyStart)
+            );
+            dest.setOutlines(bookmarks);
+        } catch (Exception e) {
+            // ignore
+        }finally {
+            try {
+                dest.close();
+            } catch (Exception ignore){
+                // ignore
+            }
 
+            try {
+                src.close();
+            }catch (Exception ignore){
+                // ignore
+            }
+        }
+    }
+
+    private List<HashMap<String, Object>> makeBookmark(int pdfTotalPage, int directoryStartPage, int bodyStartPage) {
+        if (pdfTotalPage < 1) {
+            return Collections.emptyList();
+        }
+        directoryStartPage = directoryStartPage < 1 ? 1 : directoryStartPage;
+        bodyStartPage = bodyStartPage < 1 ? 1 : bodyStartPage;
+
+        List<HashMap<String, Object>> bookmarks = new ArrayList<>();
+
+        HashMap<String, Object> directory = makeBookmarkWithTitleAndPage("目录", directoryStartPage);
+        bookmarks.add(directory);
+
+        for (int i = bodyStartPage; i <= pdfTotalPage; i++) {
+            //实际页数
+            int truePage = i - bodyStartPage + 1;
+            bookmarks.add(makeBookmarkWithTitleAndPage(truePage + "", i));
+        }
+
+        return bookmarks;
+
+    }
+
+    /**
+     * 生成单个书签
+     *
+     * @param title 书签标题
+     * @param page  书签要跳转的页数
+     * @return 生成的书签
+     */
+    private HashMap<String, Object> makeBookmarkWithTitleAndPage(String title, int page) {
+        return new HashMap<String, Object>() {{
+            put("Action", "GoTo");
+            put("Title", title);
+            //这个格式的空格不能少
+            put("Page", page + " XYZ 0 0 0.0");
+        }};
     }
 
     public TextField getText_regex() {

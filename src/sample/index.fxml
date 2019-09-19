@@ -57,7 +57,7 @@
                     <AnchorPane prefHeight="200.0" prefWidth="200.0">
                         <children>
                             <TextField fx:id="text_pdf_file_path" layoutX="14.0" layoutY="212.0" prefHeight="49.0" prefWidth="577.0" promptText="(PDF file path)" />
-                            <Button fx:id="button_pdf_work" layoutX="237.0" layoutY="377.0" mnemonicParsing="false" onAction="#pdfWorkStart" text="生成书签" />
+                            <Button fx:id="button_pdf_work" layoutX="237.0" layoutY="377.0" mnemonicParsing="false" onAction="#makePdfBookmark" text="生成书签" />
                             <TextField fx:id="text_pdf_directory_start" layoutX="41.0" layoutY="293.0" promptText="(目录开始的张数)"/>
                             <TextField fx:id="text_pdf_body_start" layoutX="317.0" layoutY="293.0" promptText="(正文开始的张数)"/>
                         </children>
